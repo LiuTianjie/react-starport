@@ -1,132 +1,167 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
+import { message } from "antd";
+import BaseLayout from "../layout/BaseLayout";
 import { Video } from "../components/Video";
 import TopBar from "../components/top-left-bar/TopBar";
-import BaseLayout from "../layout/BaseLayout";
+import { FundViewOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import { useLocation } from "react-router-dom";
+
+interface MirrorPc {
+  [id: string]: RTCPeerConnection;
+}
+
+interface Res {
+  id: string;
+  msg: {
+    type: string;
+    content: any;
+  };
+}
+
 function Serve() {
   const location = useLocation;
-  const [videoSrc, setVideoSrc] = useState<MediaStream>(new MediaStream());
-  const ws = useRef<WebSocket>(new WebSocket("ws://10.28.141.52:8080/offer"));
-
-  ws.current.onopen = function (e) {
-    console.log("WebSocket connection starting!");
+  const pcs = useRef<MirrorPc>({});
+  // const ws = useRef<WebSocket>(new WebSocket("ws://10.28.141.52:8080/offer"));
+  const ws = {
+    current: new WebSocket("wss://mirror.nickname4th.vip/offer"),
   };
-
-  ws.current.onclose = function (evt) {
-    console.log("Connection closed.");
-    ws.current.send("connection closed!");
+  // const ws = useRef<WebSocket>(
+  //   new WebSocket("ws://mirrorsocket.nickname4th.vip/offer")
+  // );
+  const videoSrc = useRef<MediaStream>(new MediaStream());
+  const configuration = {
+    iceServers: [{ urls: "stun:stun.voipbuster.com:3478" }],
   };
+  const [isConnected, setConnect] = useState(false);
 
-  // Click to choose share which to share.
-  const clickToShareScreen = async function () {
-    await navigator.mediaDevices
-      .getDisplayMedia({ video: true })
-      .then((stream) => {
-        setVideoSrc(stream);
-        stream.getVideoTracks()[0].addEventListener("ended", () => {
-          console.log("用户停止共享屏幕！");
-        });
-      })
-      .catch((error) => {
-        console.log("获取视频流失败！");
-      });
-  };
+  useEffect(() => {
+    console.log("rebing!");
+    ws.current.onopen = function (e) {
+      message.success("WebSocket connection starting!");
+    };
+    ws.current.onmessage = async function (e) {
+      let res: Res = JSON.parse(e.data);
+      let id = res.id;
+      let type = res.msg.type;
+      console.log("Received msg:", res);
+      switch (type) {
+        case "answer": {
+          console.log(`Received answer from ${id}`);
+          const remoteDesc = new RTCSessionDescription(
+            res.msg.content as RTCSessionDescriptionInit
+          );
+          await pcs.current[id].setRemoteDescription(remoteDesc);
+          await sendOffer(pcs.current[id], id);
+          break;
+        }
+        case "canditate": {
+          console.log(`Received canditate from ${id}`);
+          if (res.msg.content.iceCandidate) {
+            try {
+              await pcs.current[id].addIceCandidate(
+                res.msg.content.iceCandidate
+              );
+            } catch (e) {
+              console.log(`Error adding received ice candidate from ${id}`, e);
+            }
+          }
+          break;
+        }
+        case "req": {
+          createPc(id);
+          break;
+        }
+        case "hangup": {
+          break;
+        }
+      }
+    };
+  });
 
-  // Stop Shareing function.
-  // If it is at init state, avoid to stop it.
-  const stopShare = useRefCallBack(() => {
-    if (videoSrc.getTracks().length != 0) {
-      videoSrc.getTracks()[0].stop();
-    }
-  }, [videoSrc]);
-
-  // useRefCallback function
-  function useRefCallBack(fn: () => void, deps: MediaStream[]) {
-    const ref = useRef(fn);
-    useEffect(() => {
-      ref.current = fn;
-    }, [fn, deps]);
-    return useCallback(() => {
-      const fn = ref.current;
-      return fn();
-    }, [ref]);
+  // Once Serve received a req, create a peerConnection and put it into MirrorPc
+  async function createPc(id: string) {
+    console.log("creating peerConnection");
+    let pc = new RTCPeerConnection(configuration);
+    pc.addEventListener("icecandidate", async (e) => {
+      console.log("ICE canditate:", { e });
+      if (e.candidate) {
+        ws.current!.send(
+          JSON.stringify({ id: id, content: { candidate: e.candidate } })
+        );
+      }
+    });
+    pc.addEventListener("connectionstatechange", (e) => {
+      console.log("State changed: ", { e });
+      if (pc.connectionState === "connected") {
+        console.log("Connected!");
+      }
+    });
+    videoSrc.current.getTracks().forEach((track) => {
+      console.log(track);
+      pc.addTrack(track, videoSrc.current);
+    });
+    pcs.current[id] = pc;
+    await sendOffer(pcs.current[id], id);
   }
 
-  // Close the sharing videoSrc before leaving page.
-  // Note: This useEffect get "stopShare" function after the page is loaded,
-  // which capture the inital value of videoSrc and it's not the videoSrc
-  // we later choosed, so we should make sure it capture the newest videoSrc.
+  async function sendOffer(pc: RTCPeerConnection, id: string) {
+    const offer = await pc.createOffer();
+    console.log("sending offer:", { offer });
+    await pc.setLocalDescription(offer);
+    let offerDesc = {
+      id,
+      content: offer,
+    };
+    ws.current?.send(JSON.stringify(offerDesc));
+  }
+
+  async function choseShare() {
+    await navigator.mediaDevices
+      .getDisplayMedia({ audio: true, video: true })
+      .then(async (stream) => {
+        videoSrc.current = stream;
+        setConnect(true);
+        stream.getTracks()[0].addEventListener("ended", () => {});
+      });
+  }
+
+  const stopShare = function () {
+    // If it is at init state, avoid to stop it.
+    if (videoSrc.current.getTracks().length !== 0) {
+      videoSrc.current.getTracks()[0].stop();
+    }
+  };
   useEffect(() => {
     return () => {
-      console.log("leaving page");
+      message.info("Leaving page, websocket is closed!");
       ws.current.close();
       stopShare();
     };
   }, [location]);
-
-  // Start make call.
-  const makeCall = function () {};
   return (
     <BaseLayout>
-      {/* top-left-bar */}
-      <TopBar link="/" name="Serve" />
-      {/* video-component */}
-      <div className="w-full rounded-md mt-4 h-4/5 flex justify-center">
+      <TopBar
+        link="/"
+        name={isConnected ? "Serve (sharing...)" : "Serve (not connected)"}
+      />
+      <div className="w-full h-5/6 rounded-md mt-4 flex justify-center">
         <Video
-          className="w-full aspect-video border-2 bg-black rounded-md"
-          srcObject={videoSrc ? videoSrc : new MediaStream()}
+          className="w-3/4 aspect-video border-2 bg-black rounded-md"
+          srcObject={videoSrc ? videoSrc.current : new MediaStream()}
         />
       </div>
-      {/* control-bar */}
       <div className="w-full flex justify-center">
-        <div className="w-1/2 h-12 mt-4 grid grid-cols-3 rounded-lg content-center overflow-hidden ring-white">
+        <div className="sm:5/6 md:w-2/5 lg:w-1/4 h-12 mt-4 grid grid-cols-2 rounded-lg content-center overflow-hidden ring-white">
           <button
             className="h-12 bg-slate-400 text-white  hover:bg-blue-800  duration-300"
-            onClick={clickToShareScreen}
+            onClick={choseShare}
           >
-            <div className="flex justify-center content-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6 mr-2"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"
-                />
-              </svg>
-              <p>选择共享屏幕</p>
-            </div>
-          </button>
-          <button
-            className="h-12 font-md bg-slate-400  text-white hover:bg-lime-600 duration-300"
-            onClick={makeCall}
-          >
-            <div className="flex justify-center content-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6 mr-2"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>{" "}
-              <p> 开始共享</p>
+            <div className="flex justify-center items-center">
+              <FundViewOutlined
+                className="mr-2"
+                style={{ fontSize: "20px", alignSelf: "center" }}
+              />
+              <p className="m-0">选择共享屏幕</p>
             </div>
           </button>
           <button
@@ -134,26 +169,11 @@ function Serve() {
             onClick={stopShare}
           >
             <div className="flex justify-center content-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6 mr-2"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"
-                />
-              </svg>
-              <p>结束共享</p>
+              <CloseCircleOutlined
+                className="mr-2"
+                style={{ fontSize: "20px", alignSelf: "center" }}
+              />
+              <p className="m-0">结束共享</p>
             </div>
           </button>
         </div>

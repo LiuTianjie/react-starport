@@ -1,26 +1,21 @@
+import { ArrowLeftOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
+
 function TopBar(props: { link: string; name: string }) {
   const { link, name } = props;
   return (
     <Link
       to={link}
-      className="w-fit flex justify-between items-center font-bold text-white"
+      className="w-fit h-10 flex justify-between items-baseline font-bold text-white"
     >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-6 w-6 drop-shadow-lg"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={3}
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M15 19l-7-7 7-7"
-        />
-      </svg>
-      <p className="text-4xl drop-shadow-lg">{name}</p>
+      <ArrowLeftOutlined
+        className="mr-2 sm:text-xl md:text-2xl lg:text-4xl"
+        style={{}}
+      />
+
+      <p className="h-10 sm:text-xl md:text-2xl lg:text-4xl drop-shadow-lg">
+        {name}
+      </p>
     </Link>
   );
 }

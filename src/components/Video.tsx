@@ -11,5 +11,7 @@ export const Video = ({ srcObject, ...props }: VideoProps) => {
     refVideo.current.srcObject = srcObject;
     console.log(refVideo.current.srcObject);
   }, [srcObject]);
-  return <video ref={refVideo} autoPlay playsInline muted {...props} />;
+  return (
+    <video controls ref={refVideo} autoPlay playsInline muted {...props} />
+  );
 };
