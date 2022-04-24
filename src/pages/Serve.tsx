@@ -21,13 +21,9 @@ interface Res {
 function Serve() {
   const location = useLocation;
   const pcs = useRef<MirrorPc>({});
-  // const ws = useRef<WebSocket>(new WebSocket("ws://10.28.141.52:8080/offer"));
   const ws = {
     current: new WebSocket("wss://mirror.nickname4th.vip/offer"),
   };
-  // const ws = useRef<WebSocket>(
-  //   new WebSocket("ws://mirrorsocket.nickname4th.vip/offer")
-  // );
   const videoSrc = useRef<MediaStream>(new MediaStream());
   const configuration = {
     iceServers: [{ urls: "stun:stun.voipbuster.com:3478" }],
