@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from "react";
 import { message } from "antd";
-import BaseLayout from "../layout/BaseLayout";
 import { Video } from "../components/Video";
 import TopBar from "../components/top-left-bar/TopBar";
 import { FundViewOutlined, CloseCircleOutlined } from "@ant-design/icons";
@@ -22,7 +21,7 @@ function Serve() {
   const location = useLocation;
   const pcs = useRef<MirrorPc>({});
   const ws = {
-    current: new WebSocket("wss://mirror.nickname4th.vip/offer"),
+    current: new WebSocket(process.env.REACT_APP_WS_LINK + "/offer"),
   };
   const videoSrc = useRef<MediaStream>(new MediaStream());
   const configuration = {
@@ -135,7 +134,7 @@ function Serve() {
     };
   }, [location]);
   return (
-    <BaseLayout>
+    <>
       <TopBar
         link="/"
         name={isConnected ? "Serve (sharing...)" : "Serve (not connected)"}
@@ -174,7 +173,7 @@ function Serve() {
           </button>
         </div>
       </div>
-    </BaseLayout>
+    </>
   );
 }
 

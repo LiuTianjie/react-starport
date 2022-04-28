@@ -2,10 +2,9 @@ import React from "react";
 import earth from "./img/earth.svg";
 import glass from "./img/glass.svg";
 import { Link } from "react-router-dom";
-
-function App() {
+function App(props: { move: any }) {
   return (
-    <div className="App w-full max-h-screen flex flex-wrap content-center justify-center bg-gradient-to-r from-cyan-500 to-blue-500">
+    <div className="flex w-full h-full justify-center items-center">
       <div className="border-stone-200 w-80 sm:w-96 h-80 bg-white/20 rounded-xl shadow-xl backdrop-blur-sm backdrop-opacity-10">
         <div className="h-1/4 p-5">
           <header className="App-header flex justify-center">

@@ -1,5 +1,4 @@
 import TopBar from "../components/top-left-bar/TopBar";
-import BaseLayout from "../layout/BaseLayout";
 import { useRef, useState, useEffect } from "react";
 import { message } from "antd";
 import { Video } from "../components/Video";
@@ -11,8 +10,7 @@ function Observe() {
   const [isConnected, setConnect] = useState(false);
   const location = useLocation;
   const ws = useRef<WebSocket>(
-    // new WebSocket("wss://10.112.147.211:8081/receiver")
-    new WebSocket("wss://mirror.nickname4th.vip/receiver")
+    new WebSocket(process.env.REACT_APP_WS_LINK + "/receiver")
   );
   const configuration = {
     iceServers: [{ urls: "stun:stun.voipbuster.com:3478" }],
@@ -87,9 +85,8 @@ function Observe() {
     ws.current.send(JSON.stringify({ type: "req" }));
   };
   return (
-    <BaseLayout>
+    <div>
       <TopBar link="/" name="Observe" />
-
       <div className="w-full rounded-md mt-4 h-5/6 flex justify-center">
         <Video
           className="w-3/4 aspect-video border-2 bg-black rounded-md"
@@ -105,7 +102,7 @@ function Observe() {
           <PhoneOutlined className="ml-1" />
         </button>
       </div>
-    </BaseLayout>
+    </div>
   );
 }
 export default Observe;
