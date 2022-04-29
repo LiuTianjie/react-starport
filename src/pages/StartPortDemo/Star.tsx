@@ -2,7 +2,7 @@
  * @Author: LiuTao
  * @Date: 2022-04-25 16:54:56
  * @LastEditors: LiuTao
- * @LastEditTime: 2022-04-28 23:33:32
+ * @LastEditTime: 2022-04-29 10:46:55
  * @FilePath: /mirror/src/pages/StartPortDemo/Star.tsx
  * @Description:
  *
@@ -10,14 +10,13 @@
  */
 import StarProxy from "../starPort/StarProxy";
 import { Link } from "react-router-dom";
-function Star(props: { move: any }) {
-  const { move } = props;
+function Star() {
   let Proxies = [];
   for (let i = 0; i < 4; i++) {
     Proxies.push(
       <StarProxy
-        move={move}
         port={i.toString()}
+        key={i}
         className="h-10 w-10 overflow-hidden font-bold text-xl transition-all duration-1000 ring-2 ring-teal-300 opacity-0"
       ></StarProxy>
     );

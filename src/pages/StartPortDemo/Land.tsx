@@ -2,7 +2,7 @@
  * @Author: LiuTao
  * @Date: 2022-04-24 12:35:05
  * @LastEditors: LiuTao
- * @LastEditTime: 2022-04-28 23:34:21
+ * @LastEditTime: 2022-04-29 10:47:02
  * @FilePath: /mirror/src/pages/StartPortDemo/Land.tsx
  * @Description:
  *
@@ -10,8 +10,7 @@
  */
 import StarProxy from "../starPort/StarProxy";
 import { useParams, Link } from "react-router-dom";
-function Land(props: { move: any }) {
-  const { move } = props;
+function Land() {
   const { id } = useParams();
   return (
     <div>
@@ -25,10 +24,9 @@ function Land(props: { move: any }) {
         <div className="flex justify-around w-full">
           <StarProxy
             port={id!}
-            move={move}
             className="h-40 w-40 overflow-hidden rounded-2xl font-bold text-xl transition-all drop-shadow-2xl ring-2 ring-lime-100 duration-1000 opacity-0"
           ></StarProxy>
-        </div>{" "}
+        </div>
         <p className="w-52 mr-10 text-white text-sm">
           Rapidly build modern websites without ever leaving your HTML. A
           utility-first CSS framework packed with classes like flex, pt-4,

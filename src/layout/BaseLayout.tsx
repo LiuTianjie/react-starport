@@ -2,14 +2,13 @@
  * @Author: LiuTao
  * @Date: 2022-04-12 16:08:00
  * @LastEditors: LiuTao
- * @LastEditTime: 2022-04-28 18:38:25
+ * @LastEditTime: 2022-04-29 12:40:51
  * @FilePath: /mirror/src/layout/BaseLayout.tsx
  * @Description:
  *
  * Copyright (c) 2022 by LiuTao, All Rights Reserved.
  */
 import StarPort from "../pages/starPort/StarPort";
-import { useRef } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import Observe from "../pages/Observe";
 import Serve from "../pages/Serve";
@@ -38,25 +37,17 @@ function BaseLayout() {
     );
   });
 
-  const star_port = useRef<any>(null);
-  function MoveStar(
-    port: number,
-    classInfo: string,
-    styleInfo: React.CSSProperties
-  ) {
-    star_port.current!.MoveStar(port, classInfo, styleInfo);
-  }
   return (
     <div className="App w-full max-h-screen p-5 bg-gradient-to-r from-cyan-500 to-blue-500">
       <Routes>
-        <Route path="/" element={<App move={MoveStar} />}></Route>
+        <Route path="/" element={<App />}></Route>
         <Route path="/serve" element={<Serve />}></Route>
         <Route path="/observe" element={<Observe />}></Route>
-        <Route path="/land/:id" element={<Land move={MoveStar} />}></Route>
-        <Route path="/star" element={<Star move={MoveStar} />}></Route>
+        <Route path="/land/:id" element={<Land />}></Route>
+        <Route path="/star" element={<Star />}></Route>
       </Routes>
       {/* Create StarPort and expose the operation function to BaseLayout to dispath it into different routes */}
-      <StarPort ref={star_port} children={images}></StarPort>
+      <StarPort children={images}></StarPort>
     </div>
   );
 }

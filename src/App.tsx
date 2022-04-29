@@ -2,7 +2,7 @@ import React from "react";
 import earth from "./img/earth.svg";
 import glass from "./img/glass.svg";
 import { Link } from "react-router-dom";
-function App(props: { move: any }) {
+function App() {
   return (
     <div className="flex w-full h-full justify-center items-center">
       <div className="border-stone-200 w-80 sm:w-96 h-80 bg-white/20 rounded-xl shadow-xl backdrop-blur-sm backdrop-opacity-10">
