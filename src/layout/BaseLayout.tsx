@@ -2,7 +2,7 @@
  * @Author: LiuTao
  * @Date: 2022-04-12 16:08:00
  * @LastEditors: LiuTao
- * @LastEditTime: 2022-05-01 11:05:50
+ * @LastEditTime: 2022-05-03 18:18:33
  * @FilePath: /mirror/src/layout/BaseLayout.tsx
  * @Description:
  *
@@ -10,10 +10,7 @@
  */
 import StarPort from "../pages/starPort/StarPort";
 import { Routes, Route, useNavigate } from "react-router-dom";
-import Observe from "../pages/Observe";
-import Serve from "../pages/Serve";
 import Land from "../pages/StartPortDemo/Land";
-import App from "../App";
 import Star from "../pages/StartPortDemo/Star";
 
 function BaseLayout() {
@@ -43,13 +40,9 @@ function BaseLayout() {
   return (
     <div className="App w-full max-h-screen p-5 bg-gradient-to-r from-cyan-500 to-blue-500">
       <Routes>
-        <Route path="/" element={<App />}></Route>
-        <Route path="/serve" element={<Serve />}></Route>
-        <Route path="/observe" element={<Observe />}></Route>
         <Route path="/land/:id" element={<Land />}></Route>
-        <Route path="/star" element={<Star />}></Route>
+        <Route path="/" element={<Star />}></Route>
       </Routes>
-      {/* Create StarPort and expose the operation function to BaseLayout to dispath it into different routes */}
       <StarPort children={images}></StarPort>
     </div>
   );

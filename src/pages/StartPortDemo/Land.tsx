@@ -2,7 +2,7 @@
  * @Author: LiuTao
  * @Date: 2022-04-24 12:35:05
  * @LastEditors: LiuTao
- * @LastEditTime: 2022-05-03 18:14:56
+ * @LastEditTime: 2022-05-03 18:18:57
  * @FilePath: /mirror/src/pages/StartPortDemo/Land.tsx
  * @Description:
  *
@@ -15,7 +15,7 @@ function Land() {
   return (
     <div className="w-full h-auto">
       <div className="text-white font-bold text-3xl mt-10">
-        <Link to="/star">GOTO Back</Link>
+        <Link to="/">GOTO Back</Link>
       </div>
       <div className="flex flex-col items-center justify-center mt-20">
         <div className="w-full flex flex-col items-center">
